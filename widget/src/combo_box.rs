@@ -777,7 +777,7 @@ where
 {
     let query: Vec<String> = query
         .to_lowercase()
-        .split(|c: char| !c.is_ascii_alphanumeric())
+        .split(|c: char| !c.is_alphanumeric())
         .map(String::from)
         .collect();
 
@@ -806,6 +806,28 @@ where
     T: Display,
 {
     let mut matcher = option.to_string();
-    matcher.retain(|c| c.is_ascii_alphanumeric());
+    matcher.retain(|c| c.is_alphanumeric());
     matcher.to_lowercase()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn search_matches_unicode_font_names() {
+        let options = ["PingFang SC", "苹方 简体", "微軟正黑體", "Český Mono"];
+        let matchers = build_matchers(options);
+
+        for (query, expected) in [
+            ("ping fang", "PingFang SC"),
+            ("苹 方", "苹方 简体"),
+            ("微軟", "微軟正黑體"),
+            ("český mono", "Český Mono"),
+        ] {
+            let matches: Vec<_> = search(options, &matchers, query).collect();
+
+            assert_eq!(matches, [expected]);
+        }
+    }
 }

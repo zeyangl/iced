@@ -30,6 +30,12 @@ pub trait Operation<T = ()>: Send {
     /// Operates on a widget that contains other widgets.
     fn container(&mut self, _id: Option<&Id>, _bounds: Rectangle, _viewport: &Rectangle) {}
 
+    /// Enters an independent text selection region in layout coordinates.
+    ///
+    /// Widgets must call this inside a dedicated [`Self::traverse`] so the
+    /// region and its scroll translations do not affect sibling regions.
+    fn text_scope(&mut self, _bounds: Rectangle) {}
+
     /// Operates on a widget that can be scrolled.
     fn scrollable(
         &mut self,
@@ -69,6 +75,10 @@ where
 
     fn container(&mut self, id: Option<&Id>, bounds: Rectangle, viewport: &Rectangle) {
         self.as_mut().container(id, bounds, viewport);
+    }
+
+    fn text_scope(&mut self, bounds: Rectangle) {
+        self.as_mut().text_scope(bounds);
     }
 
     fn focusable(&mut self, id: Option<&Id>, bounds: Rectangle, state: &mut dyn Focusable) {
@@ -171,6 +181,10 @@ where
             self.operation.container(id, bounds, viewport);
         }
 
+        fn text_scope(&mut self, bounds: Rectangle) {
+            self.operation.text_scope(bounds);
+        }
+
         fn focusable(&mut self, id: Option<&Id>, bounds: Rectangle, state: &mut dyn Focusable) {
             self.operation.focusable(id, bounds, state);
         }
@@ -245,6 +259,10 @@ where
                     operation.container(id, bounds, viewport);
                 }
 
+                fn text_scope(&mut self, bounds: Rectangle) {
+                    self.operation.text_scope(bounds);
+                }
+
                 fn scrollable(
                     &mut self,
                     id: Option<&Id>,
@@ -291,6 +309,10 @@ where
 
         fn container(&mut self, id: Option<&Id>, bounds: Rectangle, viewport: &Rectangle) {
             self.operation.container(id, bounds, viewport);
+        }
+
+        fn text_scope(&mut self, bounds: Rectangle) {
+            self.operation.text_scope(bounds);
         }
 
         fn focusable(&mut self, id: Option<&Id>, bounds: Rectangle, state: &mut dyn Focusable) {
@@ -370,6 +392,10 @@ where
 
         fn container(&mut self, id: Option<&Id>, bounds: Rectangle, viewport: &Rectangle) {
             self.operation.container(id, bounds, viewport);
+        }
+
+        fn text_scope(&mut self, bounds: Rectangle) {
+            self.operation.text_scope(bounds);
         }
 
         fn focusable(&mut self, id: Option<&Id>, bounds: Rectangle, state: &mut dyn Focusable) {

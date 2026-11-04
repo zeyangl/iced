@@ -458,7 +458,11 @@ where
                         .is_none_or(|maximized| **pane == maximized)
                 })
                 .for_each(|((_pane, content), (layout, state))| {
-                    content.operate(state, layout, viewport, renderer, operation);
+                    operation.traverse(&mut |operation| {
+                        operation
+                            .text_scope(layout.bounds().intersection(viewport).unwrap_or_default());
+                        content.operate(state, layout, viewport, renderer, operation);
+                    });
                 });
         });
     }
